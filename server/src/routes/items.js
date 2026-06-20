@@ -5,6 +5,7 @@ import fs from "node:fs";
 import crypto from "node:crypto";
 import { fileURLToPath } from "node:url";
 import { db } from "../db.js";
+import { requireAuth } from "../middleware/basicAuth.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const uploadsDir = path.join(__dirname, "..", "..", "uploads");
@@ -56,7 +57,7 @@ router.get("/", (req, res) => {
   res.json(rows.map(withAvailability));
 });
 
-router.post("/", upload.single("image"), (req, res) => {
+router.post("/", requireAuth, upload.single("image"), (req, res) => {
   const { name, description = "", stock = 0 } = req.body;
   if (!name || !name.trim()) {
     return res.status(400).json({ error: "Name ist erforderlich." });
@@ -80,7 +81,7 @@ router.post("/", upload.single("image"), (req, res) => {
   res.status(201).json(withAvailability(row));
 });
 
-router.put("/:id", upload.single("image"), (req, res) => {
+router.put("/:id", requireAuth, upload.single("image"), (req, res) => {
   const item = db.prepare("SELECT * FROM items WHERE id = ?").get(req.params.id);
   if (!item) return res.status(404).json({ error: "Artikel nicht gefunden." });
 
@@ -118,7 +119,7 @@ router.put("/:id", upload.single("image"), (req, res) => {
   res.json(withAvailability(row));
 });
 
-router.delete("/:id", (req, res) => {
+router.delete("/:id", requireAuth, (req, res) => {
   const item = db.prepare("SELECT * FROM items WHERE id = ?").get(req.params.id);
   if (!item) return res.status(404).json({ error: "Artikel nicht gefunden." });
   db.prepare("DELETE FROM items WHERE id = ?").run(item.id);

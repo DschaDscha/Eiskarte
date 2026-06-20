@@ -3,8 +3,8 @@
 Mobile Bestell-App für den eigenen Eisstand. Drei Oberflächen:
 
 - **Bestellung** (`/`, `/warenkorb`) – Gäste stöbern durch die Eiskarte, legen Eis in den Warenkorb und geben mit ihrem Namen eine Bestellung auf.
-- **Admin** (`/admin`) – Eissorten anlegen/bearbeiten/löschen inkl. Foto (z. B. aus der iPhone-Fotogalerie) und Lagerbestand.
-- **Abholung** (`/abholung`) – Übersicht aller offenen Bestellungen je Gast, zum Abhaken beim Rausholen aus dem Keller. Beim Abhaken wird der Lagerbestand automatisch reduziert.
+- **Admin** (`/admin`) – Eissorten anlegen/bearbeiten/löschen inkl. Foto (z. B. aus der iPhone-Fotogalerie) und Lagerbestand. Passwortgeschützt.
+- **Abholung** (`/abholung`) – Übersicht aller offenen Bestellungen je Gast, zum Abhaken beim Rausholen aus dem Keller. Beim Abhaken wird der Lagerbestand automatisch reduziert. Passwortgeschützt.
 
 ## Architektur
 
@@ -50,3 +50,23 @@ Falls vor dem Server ein Reverse Proxy (nginx, Apache) läuft, einfach alle Anfr
 - Hochgeladene Fotos liegen unter `server/uploads/`.
 
 Beide Verzeichnisse sollten bei Backups/Updates erhalten bleiben.
+
+### Zugangsschutz für Admin & Abholung
+
+`/admin` und `/abholung` sowie die zugehörigen API-Endpunkte (Eissorten anlegen/bearbeiten/löschen, Bestellungen einsehen/abschließen) sind per HTTP Basic Auth geschützt. Der Browser fragt beim ersten Zugriff automatisch nach Benutzername/Passwort.
+
+Standardmäßig: Benutzername `admin`, Passwort `eis2024`. **Vor dem Live-Betrieb unbedingt per Umgebungsvariablen überschreiben:**
+
+```bash
+export ADMIN_USERNAME=dein-benutzername
+export ADMIN_PASSWORD=ein-sicheres-passwort
+npm run start --prefix server
+```
+
+Mit pm2:
+
+```bash
+ADMIN_USERNAME=dein-benutzername ADMIN_PASSWORD=ein-sicheres-passwort pm2 start server/src/index.js --name eiskarte
+```
+
+Die Bestellseite (`/`, `/warenkorb`) bleibt für Gäste ohne Login erreichbar.

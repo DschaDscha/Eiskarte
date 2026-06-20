@@ -4,6 +4,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import itemsRouter from "./routes/items.js";
 import ordersRouter from "./routes/orders.js";
+import { requireAuth } from "./middleware/basicAuth.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -17,6 +18,7 @@ app.use("/api/items", itemsRouter);
 app.use("/api/orders", ordersRouter);
 
 const clientDist = path.join(__dirname, "..", "..", "client", "dist");
+app.get(["/admin", "/abholung"], requireAuth);
 app.use(express.static(clientDist));
 app.get(/^(?!\/api).*/, (req, res) => {
   res.sendFile(path.join(clientDist, "index.html"));

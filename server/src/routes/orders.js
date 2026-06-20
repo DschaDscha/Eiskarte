@@ -1,5 +1,6 @@
 import express from "express";
 import { db } from "../db.js";
+import { requireAuth } from "../middleware/basicAuth.js";
 
 const router = express.Router();
 
@@ -12,7 +13,7 @@ function getOrderWithItems(orderId) {
   return { ...order, items };
 }
 
-router.get("/", (req, res) => {
+router.get("/", requireAuth, (req, res) => {
   const { status } = req.query;
   const orders = status
     ? db.prepare("SELECT * FROM orders WHERE status = ? ORDER BY created_at ASC").all(status)
@@ -101,7 +102,7 @@ const completeOrder = db.transaction((orderId) => {
   ).run(orderId);
 });
 
-router.patch("/:id/complete", (req, res) => {
+router.patch("/:id/complete", requireAuth, (req, res) => {
   try {
     completeOrder(req.params.id);
   } catch (err) {
@@ -126,7 +127,7 @@ const reopenOrder = db.transaction((orderId) => {
   db.prepare("UPDATE orders SET status = 'open', completed_at = NULL WHERE id = ?").run(orderId);
 });
 
-router.patch("/:id/reopen", (req, res) => {
+router.patch("/:id/reopen", requireAuth, (req, res) => {
   try {
     reopenOrder(req.params.id);
   } catch (err) {
