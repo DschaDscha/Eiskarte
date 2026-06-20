@@ -90,6 +90,7 @@ const completeOrder = db.transaction((orderId) => {
 
   const items = db.prepare("SELECT * FROM order_items WHERE order_id = ?").all(orderId);
   for (const oi of items) {
+    if (oi.item_id === null) continue;
     db.prepare("UPDATE items SET stock = MAX(0, stock - ?) WHERE id = ?").run(
       oi.quantity,
       oi.item_id
@@ -119,6 +120,7 @@ const reopenOrder = db.transaction((orderId) => {
 
   const items = db.prepare("SELECT * FROM order_items WHERE order_id = ?").all(orderId);
   for (const oi of items) {
+    if (oi.item_id === null) continue;
     db.prepare("UPDATE items SET stock = stock + ? WHERE id = ?").run(oi.quantity, oi.item_id);
   }
   db.prepare("UPDATE orders SET status = 'open', completed_at = NULL WHERE id = ?").run(orderId);
