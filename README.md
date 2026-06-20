@@ -44,6 +44,64 @@ pm2 start server/src/index.js --name eiskarte
 
 Falls vor dem Server ein Reverse Proxy (nginx, Apache) läuft, einfach alle Anfragen an Port `3001` weiterleiten.
 
+## Deployment mit Docker
+
+Im Repo liegen ein `Dockerfile` (baut Client + Server in einem Image) und eine `docker-compose.yml` mit persistenten Volumes für Datenbank und Uploads.
+
+### Mit Docker Compose (empfohlen)
+
+1. Passwort setzen: Datei `.env` im Projektordner anlegen (wird von Docker Compose automatisch eingelesen):
+   ```
+   ADMIN_USERNAME=dein-benutzername
+   ADMIN_PASSWORD=ein-sicheres-passwort
+   ```
+
+2. Bauen und starten:
+   ```bash
+   docker compose up -d --build
+   ```
+
+3. App ist erreichbar unter `http://<server-ip>:3001`.
+
+4. Logs ansehen / Container neu starten:
+   ```bash
+   docker compose logs -f
+   docker compose restart
+   ```
+
+5. Stoppen (Daten bleiben durch die Volumes erhalten):
+   ```bash
+   docker compose down
+   ```
+
+Datenbank und hochgeladene Fotos liegen in den benannten Volumes `eiskarte-data` und `eiskarte-uploads` und überleben `docker compose down` sowie Image-Updates (`docker compose up -d --build` nach Codeänderungen).
+
+### Ohne Docker Compose (reines `docker`)
+
+```bash
+docker build -t eiskarte .
+
+docker run -d \
+  --name eiskarte \
+  -p 3001:3001 \
+  -e ADMIN_USERNAME=dein-benutzername \
+  -e ADMIN_PASSWORD=ein-sicheres-passwort \
+  -v eiskarte-data:/app/server/data \
+  -v eiskarte-uploads:/app/server/uploads \
+  --restart unless-stopped \
+  eiskarte
+```
+
+### Reverse Proxy / HTTPS vor dem Container
+
+Falls die App über eine eigene Domain mit HTTPS laufen soll (z. B. für den Fotoupload vom iPhone), nginx oder Caddy vor den Container schalten und auf `http://localhost:3001` proxien. Beispiel für Caddy (`Caddyfile`):
+
+```
+eiskarte.deine-domain.de {
+  reverse_proxy localhost:3001
+}
+```
+
 ### Daten & Uploads
 
 - Die SQLite-Datenbank liegt unter `server/data/eiskarte.db` und wird beim ersten Start automatisch angelegt.
