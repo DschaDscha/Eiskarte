@@ -112,7 +112,6 @@ export default function Admin() {
           <input
             type="file"
             accept="image/*"
-            capture="environment"
             onChange={(e) => setImageFile(e.target.files?.[0] ?? null)}
           />
         </label>
