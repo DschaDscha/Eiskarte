@@ -4,6 +4,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import itemsRouter from "./routes/items.js";
 import ordersRouter from "./routes/orders.js";
+import imageSearchRouter from "./routes/imageSearch.js";
 import { requireAuth } from "./middleware/basicAuth.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -16,6 +17,7 @@ app.use("/uploads", express.static(path.join(__dirname, "..", "uploads")));
 
 app.use("/api/items", itemsRouter);
 app.use("/api/orders", ordersRouter);
+app.use("/api/image-search", imageSearchRouter);
 
 const clientDist = path.join(__dirname, "..", "..", "client", "dist");
 app.get(["/admin", "/abholung"], requireAuth);

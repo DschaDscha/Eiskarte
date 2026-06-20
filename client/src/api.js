@@ -15,6 +15,7 @@ export const api = {
   updateItem: (id, formData) =>
     request(`/items/${id}`, { method: "PUT", body: formData }),
   deleteItem: (id) => request(`/items/${id}`, { method: "DELETE" }),
+  searchImages: (query) => request(`/image-search?q=${encodeURIComponent(query)}`),
 
   getOrders: (status) => request(`/orders${status ? `?status=${status}` : ""}`),
   createOrder: (customerName, items) =>

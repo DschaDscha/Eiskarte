@@ -128,3 +128,28 @@ ADMIN_USERNAME=dein-benutzername ADMIN_PASSWORD=ein-sicheres-passwort pm2 start 
 ```
 
 Die Bestellseite (`/`, `/warenkorb`) bleibt für Gäste ohne Login erreichbar.
+
+### Online-Bildersuche im Admin-Bereich (Google)
+
+Beim Anlegen/Bearbeiten einer Eissorte kann im Admin-Bereich statt eines eigenen Fotos auch direkt ein Bild über die Google-Bildersuche gesucht und übernommen werden. Dafür wird die **Google Custom Search JSON API** verwendet (kostenloses Kontingent: 100 Suchanfragen/Tag).
+
+Einrichtung:
+
+1. Im [Google Cloud Console](https://console.cloud.google.com/) ein Projekt anlegen (oder ein bestehendes nutzen) und die **Custom Search API** aktivieren.
+2. Unter „APIs & Dienste" → „Anmeldedaten" einen **API-Key** erstellen → das ist `GOOGLE_API_KEY`.
+3. Unter [Programmable Search Engine](https://programmablesearchengine.google.com/) eine neue Suchmaschine anlegen:
+   - „Im gesamten Web suchen" aktivieren
+   - „Bildersuche" aktivieren
+   - die Suchmaschinen-ID (`cx`) kopieren → das ist `GOOGLE_CSE_ID`.
+4. Beide Werte als Umgebungsvariablen setzen:
+   ```bash
+   export GOOGLE_API_KEY=dein-api-key
+   export GOOGLE_CSE_ID=deine-suchmaschinen-id
+   ```
+   Bei Docker Compose stattdessen in der `.env`-Datei ergänzen:
+   ```
+   GOOGLE_API_KEY=dein-api-key
+   GOOGLE_CSE_ID=deine-suchmaschinen-id
+   ```
+
+Sind die Variablen nicht gesetzt, bleibt die Online-Bildersuche im Admin-Bereich einfach deaktiviert (Fehlermeldung beim Suchen) – der normale Foto-Upload funktioniert davon unabhängig weiter.

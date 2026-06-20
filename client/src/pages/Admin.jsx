@@ -9,8 +9,13 @@ export default function Admin() {
   const [error, setError] = useState("");
   const [form, setForm] = useState(emptyForm);
   const [imageFile, setImageFile] = useState(null);
+  const [selectedImageUrl, setSelectedImageUrl] = useState(null);
   const [editingId, setEditingId] = useState(null);
   const [saving, setSaving] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
+  const [searching, setSearching] = useState(false);
+  const [searchError, setSearchError] = useState("");
 
   function loadItems() {
     setLoading(true);
@@ -28,12 +33,43 @@ export default function Admin() {
   function resetForm() {
     setForm(emptyForm);
     setImageFile(null);
+    setSelectedImageUrl(null);
+    setSearchResults([]);
+    setSearchQuery("");
+    setSearchError("");
     setEditingId(null);
   }
 
   function startEdit(item) {
     setEditingId(item.id);
     setForm({ name: item.name, description: item.description, stock: String(item.stock) });
+    setImageFile(null);
+    setSelectedImageUrl(null);
+    setSearchResults([]);
+    setSearchQuery(item.description || item.name);
+    setSearchError("");
+  }
+
+  async function handleSearchImages() {
+    const query = searchQuery.trim() || form.description.trim() || form.name.trim();
+    if (!query) {
+      setSearchError("Bitte erst eine Beschreibung oder einen Namen eingeben.");
+      return;
+    }
+    setSearching(true);
+    setSearchError("");
+    try {
+      const results = await api.searchImages(query);
+      setSearchResults(results);
+    } catch (err) {
+      setSearchError(err.message);
+    } finally {
+      setSearching(false);
+    }
+  }
+
+  function selectSearchResult(result) {
+    setSelectedImageUrl(result.fullImage);
     setImageFile(null);
   }
 
@@ -49,7 +85,11 @@ export default function Admin() {
     fd.append("name", form.name);
     fd.append("description", form.description);
     fd.append("stock", form.stock);
-    if (imageFile) fd.append("image", imageFile);
+    if (imageFile) {
+      fd.append("image", imageFile);
+    } else if (selectedImageUrl) {
+      fd.append("imageUrl", selectedImageUrl);
+    }
 
     try {
       if (editingId) {
@@ -112,9 +152,55 @@ export default function Admin() {
           <input
             type="file"
             accept="image/*"
-            onChange={(e) => setImageFile(e.target.files?.[0] ?? null)}
+            onChange={(e) => {
+              setImageFile(e.target.files?.[0] ?? null);
+              setSelectedImageUrl(null);
+            }}
           />
         </label>
+
+        {selectedImageUrl && (
+          <div className="admin__image-preview">
+            <img src={selectedImageUrl} alt="Ausgewähltes Bild" />
+            <button type="button" onClick={() => setSelectedImageUrl(null)}>
+              Auswahl entfernen
+            </button>
+          </div>
+        )}
+
+        <div className="admin__image-search">
+          <label>
+            Oder Bild online suchen
+            <div className="admin__image-search-row">
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="z. B. Erdbeereis"
+              />
+              <button type="button" onClick={handleSearchImages} disabled={searching}>
+                {searching ? "Suche…" : "Suchen"}
+              </button>
+            </div>
+          </label>
+          {searchError && <p className="status-text status-text--error">{searchError}</p>}
+          {searchResults.length > 0 && (
+            <div className="admin__image-results">
+              {searchResults.map((result, i) => (
+                <button
+                  type="button"
+                  key={i}
+                  className="admin__image-result"
+                  onClick={() => selectSearchResult(result)}
+                  title={result.title}
+                >
+                  <img src={result.thumbnail} alt={result.title} />
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
         {error && <p className="status-text status-text--error">{error}</p>}
         <div className="admin__form-actions">
           <button type="submit" className="btn-primary" disabled={saving}>
