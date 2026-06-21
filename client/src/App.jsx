@@ -3,6 +3,7 @@ import Menu from "./pages/Menu.jsx";
 import Cart from "./pages/Cart.jsx";
 import Admin from "./pages/Admin.jsx";
 import Pickup from "./pages/Pickup.jsx";
+import Entnahme from "./pages/Entnahme.jsx";
 import { useCart } from "./context/CartContext.jsx";
 
 export default function App() {
@@ -20,6 +21,7 @@ export default function App() {
           <Route path="/warenkorb" element={<Cart />} />
           <Route path="/admin" element={<Admin />} />
           <Route path="/abholung" element={<Pickup />} />
+          <Route path="/entnahme" element={<Entnahme />} />
         </Routes>
       </main>
 
@@ -38,6 +40,10 @@ export default function App() {
         <NavLink to="/abholung" className="bottom-nav__item">
           <span className="bottom-nav__icon">📋</span>
           <span>Abholung</span>
+        </NavLink>
+        <NavLink to="/entnahme" className="bottom-nav__item">
+          <span className="bottom-nav__icon">🧊</span>
+          <span>Entnahme</span>
         </NavLink>
         <NavLink to="/admin" className="bottom-nav__item">
           <span className="bottom-nav__icon">⚙️</span>

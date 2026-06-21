@@ -20,7 +20,7 @@ app.use("/api/orders", ordersRouter);
 app.use("/api/image-search", imageSearchRouter);
 
 const clientDist = path.join(__dirname, "..", "..", "client", "dist");
-app.get(["/admin", "/abholung"], requireAuth);
+app.get(["/admin", "/abholung", "/entnahme"], requireAuth);
 app.use(express.static(clientDist));
 app.get(/^(?!\/api).*/, (req, res) => {
   res.sendFile(path.join(clientDist, "index.html"));
